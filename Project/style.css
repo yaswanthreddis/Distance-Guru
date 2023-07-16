@@ -1,0 +1,67 @@
+/* Add your desired CSS styles here */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px;
+  }
+  
+  nav img {
+    height: 40px;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  nav ul li {
+    position: relative;
+  }
+  
+  nav ul li a {
+    text-decoration: none;
+    color: #333;
+  }
+  
+  nav ul li a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #333;
+  }
+  
+  #card {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .page {
+    display: none;
+  }
+  
+  .page.active {
+    display: block;
+  }
+  
+  #home-page input[type="text"],
+  #home-page button {
+    display: block;
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 100%;
+  }
+  
+  #result-section {
+    margin-top: 20px;
+    text-align: center;
+  }
+  

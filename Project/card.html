@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Distance Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqJU47o0ksdpXbcxY3dvu531suKk39vqQ&libraries=places"></script>
+
+  <script>
+    var map;
+    var directionsService;
+    var directionsRenderer;
+
+    $(function () {
+      google.maps.event.addDomListener(window, "load", function () {
+        var from_places = new google.maps.places.Autocomplete(document.getElementById("from_places"));
+        var to_places = new google.maps.places.Autocomplete(document.getElementById("to_places"));
+
+        google.maps.event.addListener(from_places, "places_changed", () => {
+          var from_place = from_places.getPlace();
+          var from_address = from_place.formatted_address;
+          console.log(from_address);
+        });
+
+        google.maps.event.addListener(to_places, "places_changed", () => {
+          var to_place = to_places.getPlace();
+          var to_address = to_place.formatted_address;
+          console.log(to_address);
+        });
+      });
+
+      function calculateDistance(location1, location2) {
+        var service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix(
+          {
+            origins: [location1],
+            destinations: [location2],
+            travelMode: 'DRIVING',
+            unitSystem: google.maps.UnitSystem.METRIC,
+          },
+          function(response, status) {
+            if (status == 'OK') {
+              var distance = response.rows[0].elements[0].distance.text;
+              var duration = response.rows[0].elements[0].duration.text;
+              var resultText = 'Distance between ' + location1 + ' and ' + location2 + ' is ' + distance + ', and it takes approximately ' + duration + ' to travel.';
+              $('#distanceResult').text(resultText);
+
+              // Update source and destination images
+              fetchImage(location1, 'sourceImage');
+              fetchImage(location2, 'destinationImage');
+
+              // Retrieve directions and display on the map
+              calculateDirections(location1, location2);
+            } else {
+              $('#distanceResult').text('Error: Unable to calculate distance');
+            }
+          }
+        );
+      }
+
+      function calculateDirections(location1, location2) {
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer();
+
+        var mapOptions = {
+          zoom: 10,
+          center: { lat: 0, lng: 0 },
+        };
+        map = new google.maps.Map(document.getElementById("map"), mapOptions);
+        directionsRenderer.setMap(map);
+
+        var request = {
+          origin: location1,
+          destination: location2,
+          travelMode: 'DRIVING'
+        };
+
+        directionsService.route(request, function(result, status) {
+          if (status == 'OK') {
+            directionsRenderer.setDirections(result);
+          }
+        });
+      }
+
+      $(function () {
+        $('#distanceForm').submit(function(event) {
+          event.preventDefault();
+          var location1 = $('#from_places').val();
+          var location2 = $('#to_places').val();
+          calculateDistance(location1, location2);
+        });
+      });
+
+      function fetchImage(location, elementId) {
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: location }, function(results, status) {
+          if (status === 'OK') {
+            if (results[0]) {
+              var placeId = results[0].place_id;
+              var service = new google.maps.places.PlacesService(map);
+              service.getDetails({ placeId: placeId }, function(place, status) {
+                if (status === 'OK') {
+                  var photoUrl = place.photos[0].getUrl({ maxWidth: 400, maxHeight: 300 });
+                  $('#' + elementId).attr('src', photoUrl);
+                }
+              });
+            }
+          } else {
+            console.log('Geocode failed: ' + status);
+          }
+        });
+      }
+    });
+  </script>
+  <style>
+    /* CSS styles for the navigation bar */
+    nav {
+      background-color: orangered;
+      height: 70px;
+    }
+
+    nav .container {
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+    }
+
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    nav ul li {
+      margin: 0 10px;
+    }
+
+    nav ul li a {
+      color: black;
+      text-decoration: none;
+    }
+
+    nav ul li a.active {
+      font-weight: bold;
+    }
+
+    /* CSS styles for the rest of the page */
+    .center-heading {
+      display: flex;
+      justify-content: center;
+    }
+    .center-card {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+    }
+    .custom-card {
+      width: 90%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    input-group {
+      margin-bottom: 30px;
+    }
+    .text-center {
+      margin-top: 30px;
+    }
+    .image-container {
+      margin-top: 30px;
+    }
+    .image-container img {
+      margin-bottom: 20px;
+    }
+    @media (max-width: 576px) {
+      .center-card {
+        min-height: 60vh;
+      }
+    }
+    body {
+      background-color: #3487ff;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <img src="logo.jpg" alt="Logo" width="170px" height="55px">
+      <ul>
+        <li><a href="#" class="nav-link active text-dark" data-page="home">Home</a></li>
+        <li><a href="#" class="nav-link text-dark" data-page="about">About</a></li>
+        <li><a href="#" class="nav-link text-dark" data-page="contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 center-heading">
+        <h1 style="font-size: 50px;">Distance Guru</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 center-card">
+        <div class="card custom-card">
+          <div class="card-header">
+            <h3>Distance Calculator</h3>
+          </div>
+          <div class="card-body">
+            <form id="distanceForm">
+              <div class="form-group">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="fa fa-map-marker"></i>
+                    </span>
+                  </div>
+                  <input type="text" class="form-control" id="from_places" placeholder="Enter 1st Location" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="fa fa-map-marker"></i>
+                    </span>
+                  </div>
+                  <input type="text" class="form-control" id="to_places" placeholder="Enter 2nd Location" required>
+                </div>
+              </div>
+              <div class="text-center">
+                <button type="submit" id="but1" class="btn btn-primary">Calculate Distance</button>
+              </div>
+            </form>
+            <div class="result" id="distanceResult"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div id="map" style="height: 400px;"></div>
+      </div>
+    </div>
+    <div class="row image-container">
+      <div class="col-md-6">
+        <h3 class="text-center">Source Image</h3>
+        <img id="sourceImage" src="placeholder.jpg" alt="Source Image" width="400px" height="300px">
+      </div>
+      <div class="col-md-6">
+        <h3 class="text-center">Destination Image</h3>
+        <img id="destinationImage" src="placeholder.jpg" alt="Destination Image" width="400px" height="300px">
+      </div>
+    </div>
+  </div>
+</body>
+</html>

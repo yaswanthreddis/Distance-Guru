@@ -1,0 +1,11 @@
+.card-hover {
+    text-decoration: none;
+  }
+  
+  .card-hover:hover {
+    /* Define the hover effect styles */
+    /* Example: Add a border and change the background color */
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+  }
+  
