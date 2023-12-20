@@ -1,0 +1,29 @@
+create instance with security group port range 8080-9000.
+1. cd /opt
+2.yum install docker -y
+3.service docker start
+4.docker images
+5.docker pull tomcat
+6.docker images
+7.docker run -d --name mytomcat -p 8081:8080 tomcat
+8.docker ps
+9.docker exec -it mytomcat /bin/bash
+10.mv webapps webapps2
+11.mv webapps.dist/ webapps
+12.exit
+13. vi Dockerfile
+
+FROM fedora
+RUN yum install java -y
+RUN mkdir /opt/tomcat
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.83/bin/apache-tomcat-9.0.83.tar.gz .
+RUN tar -zxvf apache-tomcat-9.0.83.tar.gz
+RUN mv apache-tomcat-9.0.83/* /opt/tomcat
+EXPOSE 8080
+CMD ["/opt/tomcat/bin/catalina.sh","run"]
+
+11.docker build -t mytomcat:v1 .
+12.docker run  -d --name mycontainer -p 8082:8080 mytomcat:v1
+13.copy the the public and paste in the browser.
+     <publicip>:8081
+                                
